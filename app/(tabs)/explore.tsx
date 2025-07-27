@@ -1,110 +1,346 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import React, { useState } from 'react';
+import { 
+  ScrollView, 
+  StyleSheet, 
+  View, 
+  SafeAreaView, 
+  KeyboardAvoidingView,
+  Platform,
+  TextInput,
+  Pressable,
+  Text
+} from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { useColorScheme } from '@/hooks/useColorScheme';
+import { Colors } from '@/constants/Colors';
+import { MessageBubble } from '@/components/MessageBubble';
+import { FamilyAvatar } from '@/components/FamilyAvatar';
 
-import { Collapsible } from '@/components/Collapsible';
-import { ExternalLink } from '@/components/ExternalLink';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
-import { IconSymbol } from '@/components/ui/IconSymbol';
+// Sample chat messages
+const SAMPLE_MESSAGES = [
+  {
+    id: '1',
+    message: 'Hey everyone! Just wanted to check in and see how everyone is doing 😊',
+    timestamp: '10:23 AM',
+    authorName: 'Mom',
+    authorAvatar: 'https://i.pravatar.cc/150?u=mom',
+    isOwn: false,
+    type: 'text' as const,
+    status: 'read' as const,
+  },
+  {
+    id: '2',
+    message: 'Doing great! Just finished my morning run. How about you?',
+    timestamp: '10:25 AM',
+    authorName: 'You',
+    isOwn: true,
+    type: 'text' as const,
+    status: 'read' as const,
+  },
+  {
+    id: '3',
+    message: 'Good morning! I\'m at the farmer\'s market. Look at these beautiful flowers!',
+    timestamp: '10:28 AM',
+    authorName: 'Grandma Rose',
+    authorAvatar: 'https://i.pravatar.cc/150?u=grandma',
+    isOwn: false,
+    type: 'image' as const,
+    mediaUrl: 'https://picsum.photos/300/200',
+    status: 'read' as const,
+  },
+  {
+    id: '4',
+    message: 'Those are gorgeous! 🌻',
+    timestamp: '10:30 AM',
+    authorName: 'You',
+    isOwn: true,
+    type: 'text' as const,
+    status: 'read' as const,
+  },
+  {
+    id: '5',
+    message: 'Just recorded a message for little Timmy\'s birthday!',
+    timestamp: '10:32 AM',
+    authorName: 'Uncle Mike',
+    isOwn: false,
+    type: 'voice' as const,
+    duration: '0:45',
+    status: 'read' as const,
+  },
+  {
+    id: '6',
+    message: 'That\'s so sweet! He\'s going to love it. Can\'t believe he\'s turning 8 already!',
+    timestamp: '10:35 AM',
+    authorName: 'Mom',
+    authorAvatar: 'https://i.pravatar.cc/150?u=mom',
+    isOwn: false,
+    type: 'text' as const,
+    status: 'read' as const,
+  },
+  {
+    id: '7',
+    message: 'Time flies! Remember when he was just learning to walk? 🥺',
+    timestamp: '10:36 AM',
+    authorName: 'You',
+    isOwn: true,
+    type: 'text' as const,
+    status: 'delivered' as const,
+  },
+  {
+    id: '8',
+    message: 'I found this old video of his first steps!',
+    timestamp: '10:38 AM',
+    authorName: 'Dad',
+    authorAvatar: 'https://i.pravatar.cc/150?u=dad',
+    isOwn: false,
+    type: 'video' as const,
+    status: 'read' as const,
+  },
+];
 
-export default function TabTwoScreen() {
+const TYPING_MEMBERS = [
+  { name: 'Cousin Sarah', imageUrl: 'https://i.pravatar.cc/150?u=sarah' },
+];
+
+export default function ChatScreen() {
+  const colorScheme = useColorScheme();
+  const colors = Colors[colorScheme ?? 'light'];
+  const [inputText, setInputText] = useState('');
+
+  const scrollViewRef = React.useRef<ScrollView>(null);
+
+  React.useEffect(() => {
+    // Scroll to bottom on mount
+    setTimeout(() => {
+      scrollViewRef.current?.scrollToEnd({ animated: false });
+    }, 100);
+  }, []);
+
+  const sendMessage = () => {
+    if (inputText.trim()) {
+      console.log('Sending message:', inputText);
+      setInputText('');
+    }
+  };
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
-      headerImage={
-        <IconSymbol
-          size={310}
-          color="#808080"
-          name="chevron.left.forwardslash.chevron.right"
-          style={styles.headerImage}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Explore</ThemedText>
-      </ThemedView>
-      <ThemedText>This app includes example code to help you get started.</ThemedText>
-      <Collapsible title="File-based routing">
-        <ThemedText>
-          This app has two screens:{' '}
-          <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> and{' '}
-          <ThemedText type="defaultSemiBold">app/(tabs)/explore.tsx</ThemedText>
-        </ThemedText>
-        <ThemedText>
-          The layout file in <ThemedText type="defaultSemiBold">app/(tabs)/_layout.tsx</ThemedText>{' '}
-          sets up the tab navigator.
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/router/introduction">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Android, iOS, and web support">
-        <ThemedText>
-          You can open this project on Android, iOS, and the web. To open the web version, press{' '}
-          <ThemedText type="defaultSemiBold">w</ThemedText> in the terminal running this project.
-        </ThemedText>
-      </Collapsible>
-      <Collapsible title="Images">
-        <ThemedText>
-          For static images, you can use the <ThemedText type="defaultSemiBold">@2x</ThemedText> and{' '}
-          <ThemedText type="defaultSemiBold">@3x</ThemedText> suffixes to provide files for
-          different screen densities
-        </ThemedText>
-        <Image source={require('@/assets/images/react-logo.png')} style={{ alignSelf: 'center' }} />
-        <ExternalLink href="https://reactnative.dev/docs/images">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Custom fonts">
-        <ThemedText>
-          Open <ThemedText type="defaultSemiBold">app/_layout.tsx</ThemedText> to see how to load{' '}
-          <ThemedText style={{ fontFamily: 'SpaceMono' }}>
-            custom fonts such as this one.
-          </ThemedText>
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/versions/latest/sdk/font">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Light and dark mode components">
-        <ThemedText>
-          This template has light and dark mode support. The{' '}
-          <ThemedText type="defaultSemiBold">useColorScheme()</ThemedText> hook lets you inspect
-          what the user&apos;s current color scheme is, and so you can adjust UI colors accordingly.
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/develop/user-interface/color-themes/">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Animations">
-        <ThemedText>
-          This template includes an example of an animated component. The{' '}
-          <ThemedText type="defaultSemiBold">components/HelloWave.tsx</ThemedText> component uses
-          the powerful <ThemedText type="defaultSemiBold">react-native-reanimated</ThemedText>{' '}
-          library to create a waving hand animation.
-        </ThemedText>
-        {Platform.select({
-          ios: (
-            <ThemedText>
-              The <ThemedText type="defaultSemiBold">components/ParallaxScrollView.tsx</ThemedText>{' '}
-              component provides a parallax effect for the header image.
-            </ThemedText>
-          ),
-        })}
-      </Collapsible>
-    </ParallaxScrollView>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
+      <KeyboardAvoidingView 
+        style={styles.keyboardAvoid}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+      >
+        {/* Chat Header */}
+        <View style={[styles.header, { backgroundColor: colors.background, borderBottomColor: colors.border }]}>
+          <View style={styles.headerContent}>
+            <FamilyAvatar
+              name="The Martinez Family"
+              size="medium"
+              backgroundColor={Colors.primary[600]}
+            />
+            <View style={styles.headerInfo}>
+              <View style={styles.headerTitle}>
+                <Text style={[styles.chatName, { color: colors.text }]}>Family Chat</Text>
+                <Ionicons name="shield-checkmark" size={16} color={Colors.primary[600]} />
+              </View>
+              <Text style={[styles.memberCount, { color: colors.textSecondary }]}>
+                12 members • 5 online
+              </Text>
+            </View>
+          </View>
+          <Pressable style={styles.headerButton}>
+            <Ionicons name="videocam-outline" size={24} color={colors.icon} />
+          </Pressable>
+          <Pressable style={styles.headerButton}>
+            <Ionicons name="information-circle-outline" size={24} color={colors.icon} />
+          </Pressable>
+        </View>
+
+        {/* Messages */}
+        <ScrollView 
+          ref={scrollViewRef}
+          style={styles.messagesContainer}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.messagesContent}
+        >
+          {SAMPLE_MESSAGES.map(message => (
+            <MessageBubble
+              key={message.id}
+              {...message}
+              onPress={() => console.log('Message pressed:', message.id)}
+              onLongPress={() => console.log('Message long pressed:', message.id)}
+            />
+          ))}
+          
+          {/* Typing Indicator */}
+          {TYPING_MEMBERS.length > 0 && (
+            <View style={styles.typingContainer}>
+              <FamilyAvatar
+                name={TYPING_MEMBERS[0].name}
+                imageUrl={TYPING_MEMBERS[0].imageUrl}
+                size="small"
+              />
+              <View style={[styles.typingBubble, { backgroundColor: colors.backgroundSecondary }]}>
+                <View style={styles.typingDots}>
+                  <View style={[styles.dot, { backgroundColor: colors.textSecondary }]} />
+                  <View style={[styles.dot, { backgroundColor: colors.textSecondary }]} />
+                  <View style={[styles.dot, { backgroundColor: colors.textSecondary }]} />
+                </View>
+              </View>
+            </View>
+          )}
+        </ScrollView>
+
+        {/* Input Bar */}
+        <View style={[styles.inputBar, { backgroundColor: colors.background, borderTopColor: colors.border }]}>
+          <Pressable style={styles.attachButton}>
+            <Ionicons name="add-circle" size={28} color={Colors.primary[600]} />
+          </Pressable>
+          
+          <View style={[styles.inputContainer, { backgroundColor: colors.backgroundSecondary }]}>
+            <TextInput
+              style={[styles.textInput, { color: colors.text }]}
+              placeholder="Type a message..."
+              placeholderTextColor={colors.textSecondary}
+              value={inputText}
+              onChangeText={setInputText}
+              multiline
+              maxLength={1000}
+            />
+            <Pressable style={styles.emojiButton}>
+              <Ionicons name="happy-outline" size={24} color={colors.icon} />
+            </Pressable>
+          </View>
+
+          {inputText.trim() ? (
+            <Pressable style={styles.sendButton} onPress={sendMessage}>
+              <Ionicons name="send" size={20} color={Colors.white} />
+            </Pressable>
+          ) : (
+            <Pressable style={styles.voiceButton}>
+              <Ionicons name="mic" size={24} color={Colors.primary[600]} />
+            </Pressable>
+          )}
+        </View>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  headerImage: {
-    color: '#808080',
-    bottom: -90,
-    left: -35,
-    position: 'absolute',
+  container: {
+    flex: 1,
   },
-  titleContainer: {
+  keyboardAvoid: {
+    flex: 1,
+  },
+  header: {
     flexDirection: 'row',
-    gap: 8,
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+  },
+  headerContent: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  headerInfo: {
+    marginLeft: 12,
+    flex: 1,
+  },
+  headerTitle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  chatName: {
+    fontSize: 18,
+    fontWeight: '600',
+  },
+  memberCount: {
+    fontSize: 14,
+    marginTop: 2,
+  },
+  headerButton: {
+    padding: 8,
+    marginLeft: 8,
+  },
+  messagesContainer: {
+    flex: 1,
+  },
+  messagesContent: {
+    paddingVertical: 16,
+  },
+  typingContainer: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    marginVertical: 4,
+    marginHorizontal: 16,
+  },
+  typingBubble: {
+    marginLeft: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 16,
+    borderBottomLeftRadius: 4,
+  },
+  typingDots: {
+    flexDirection: 'row',
+    gap: 4,
+  },
+  dot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    opacity: 0.6,
+  },
+  inputBar: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderTopWidth: 1,
+  },
+  attachButton: {
+    paddingBottom: 8,
+    paddingRight: 8,
+  },
+  inputContainer: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    borderRadius: 24,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    minHeight: 40,
+    maxHeight: 120,
+  },
+  textInput: {
+    flex: 1,
+    fontSize: 16,
+    lineHeight: 20,
+    paddingTop: 0,
+    paddingBottom: 0,
+  },
+  emojiButton: {
+    marginLeft: 8,
+    paddingBottom: 2,
+  },
+  sendButton: {
+    marginLeft: 8,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: Colors.primary[600],
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 6,
+  },
+  voiceButton: {
+    marginLeft: 8,
+    paddingBottom: 8,
+    paddingLeft: 8,
   },
 });
