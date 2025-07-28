@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, Image, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '@/constants/Colors';
-import { useColorScheme } from '@/hooks/useColorScheme';
+import { useTheme } from '@/contexts/ThemeContext';
 import { FamilyAvatar } from './FamilyAvatar';
 
 interface MessageBubbleProps {
@@ -33,7 +33,7 @@ export function MessageBubble({
   onPress,
   onLongPress,
 }: MessageBubbleProps) {
-  const colorScheme = useColorScheme();
+  const { colorScheme } = useTheme();
   const colors = Colors[colorScheme ?? 'light'];
 
   const bubbleBackgroundColor = isOwn 

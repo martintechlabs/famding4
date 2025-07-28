@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
-import { ScrollView, StyleSheet, View, SafeAreaView } from 'react-native';
-import { useColorScheme } from '@/hooks/useColorScheme';
+import { ScrollView, StyleSheet, View, SafeAreaView, Pressable, Text } from 'react-native';
+import { useTheme } from '@/contexts/ThemeContext';
 import { Colors } from '@/constants/Colors';
 import { MemoryCard } from '@/components/MemoryCard';
 import { TimelineHeader, DateSeparator } from '@/components/TimelineHeader';
 import { FloatingActionButton } from '@/components/FloatingActionButton';
+import { MobileDrawer } from '@/components/MobileDrawer';
+import { Ionicons } from '@expo/vector-icons';
 
 // Sample data for timeline
 const SAMPLE_MEMORIES = [
@@ -66,9 +68,10 @@ const ACTIVE_MEMBERS = [
 ];
 
 export default function TimelineScreen() {
-  const colorScheme = useColorScheme();
+  const { colorScheme } = useTheme();
   const colors = Colors[colorScheme ?? 'light'];
   const [currentFilter, setCurrentFilter] = useState<'all' | 'favorites' | 'photos' | 'videos'>('all');
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
   const filteredMemories = SAMPLE_MEMORIES.filter(memory => {
     switch (currentFilter) {
@@ -85,6 +88,27 @@ export default function TimelineScreen() {
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
+      <MobileDrawer 
+        isOpen={isDrawerOpen} 
+        onClose={() => setIsDrawerOpen(false)} 
+      />
+      
+      {/* Header with hamburger menu */}
+      <View style={[styles.header, { backgroundColor: colors.background, borderBottomColor: colors.border }]}>
+        <Pressable 
+          style={styles.menuButton}
+          onPress={() => setIsDrawerOpen(true)}
+        >
+          <Ionicons name="menu" size={28} color={colors.icon} />
+        </Pressable>
+        <View style={styles.headerContent}>
+          <Text style={[styles.headerTitle, { color: colors.text }]}>Timeline</Text>
+        </View>
+        <Pressable style={styles.headerButton}>
+          <Ionicons name="add-circle-outline" size={28} color={Colors.primary[600]} />
+        </Pressable>
+      </View>
+      
       <TimelineHeader
         familyName="The Martinez Family"
         memberCount={12}
@@ -139,6 +163,27 @@ export default function TimelineScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+  },
+  menuButton: {
+    padding: 8,
+    marginRight: 8,
+  },
+  headerContent: {
+    flex: 1,
+  },
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: '600',
+  },
+  headerButton: {
+    padding: 8,
   },
   scrollView: {
     flex: 1,

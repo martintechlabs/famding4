@@ -11,10 +11,11 @@ import {
   Text
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useColorScheme } from '@/hooks/useColorScheme';
+import { useTheme } from '@/contexts/ThemeContext';
 import { Colors } from '@/constants/Colors';
 import { MessageBubble } from '@/components/MessageBubble';
 import { FamilyAvatar } from '@/components/FamilyAvatar';
+import { MobileDrawer } from '@/components/MobileDrawer';
 
 // Sample chat messages
 const SAMPLE_MESSAGES = [
@@ -103,9 +104,10 @@ const TYPING_MEMBERS = [
 ];
 
 export default function ChatScreen() {
-  const colorScheme = useColorScheme();
+  const { colorScheme } = useTheme();
   const colors = Colors[colorScheme ?? 'light'];
   const [inputText, setInputText] = useState('');
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
   const scrollViewRef = React.useRef<ScrollView>(null);
 
@@ -125,44 +127,51 @@ export default function ChatScreen() {
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
+      <MobileDrawer 
+        isOpen={isDrawerOpen} 
+        onClose={() => setIsDrawerOpen(false)} 
+      />
+      
+      {/* Chat Header - Outside KeyboardAvoidingView */}
+      <View style={[styles.header, { backgroundColor: colors.background, borderBottomColor: colors.border }]}>
+        <Pressable 
+          style={styles.menuButton}
+          onPress={() => setIsDrawerOpen(true)}
+        >
+          <Ionicons name="menu" size={28} color={colors.icon} />
+        </Pressable>
+        <View style={styles.headerContent}>
+          <View style={styles.headerInfo}>
+            <View style={styles.headerTitle}>
+              <Text style={[styles.chatName, { color: colors.text }]}>Family Chat</Text>
+              <Ionicons name="shield-checkmark" size={16} color={Colors.primary[600]} />
+            </View>
+            <Text style={[styles.memberCount, { color: colors.textSecondary }]}>
+              12 members • 5 online
+            </Text>
+          </View>
+        </View>
+        <Pressable style={styles.headerButton}>
+          <Ionicons name="videocam-outline" size={24} color={colors.icon} />
+        </Pressable>
+        <Pressable style={styles.headerButton}>
+          <Ionicons name="information-circle-outline" size={24} color={colors.icon} />
+        </Pressable>
+      </View>
+
       <KeyboardAvoidingView 
         style={styles.keyboardAvoid}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
       >
-        {/* Chat Header */}
-        <View style={[styles.header, { backgroundColor: colors.background, borderBottomColor: colors.border }]}>
-          <View style={styles.headerContent}>
-            <FamilyAvatar
-              name="The Martinez Family"
-              size="medium"
-              backgroundColor={Colors.primary[600]}
-            />
-            <View style={styles.headerInfo}>
-              <View style={styles.headerTitle}>
-                <Text style={[styles.chatName, { color: colors.text }]}>Family Chat</Text>
-                <Ionicons name="shield-checkmark" size={16} color={Colors.primary[600]} />
-              </View>
-              <Text style={[styles.memberCount, { color: colors.textSecondary }]}>
-                12 members • 5 online
-              </Text>
-            </View>
-          </View>
-          <Pressable style={styles.headerButton}>
-            <Ionicons name="videocam-outline" size={24} color={colors.icon} />
-          </Pressable>
-          <Pressable style={styles.headerButton}>
-            <Ionicons name="information-circle-outline" size={24} color={colors.icon} />
-          </Pressable>
-        </View>
-
         {/* Messages */}
-        <ScrollView 
-          ref={scrollViewRef}
-          style={styles.messagesContainer}
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={styles.messagesContent}
-        >
+        <View style={styles.messagesWrapper}>
+          <ScrollView 
+            ref={scrollViewRef}
+            style={styles.messagesContainer}
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={styles.messagesContent}
+          >
           {SAMPLE_MESSAGES.map(message => (
             <MessageBubble
               key={message.id}
@@ -189,7 +198,8 @@ export default function ChatScreen() {
               </View>
             </View>
           )}
-        </ScrollView>
+          </ScrollView>
+        </View>
 
         {/* Input Bar */}
         <View style={[styles.inputBar, { backgroundColor: colors.background, borderTopColor: colors.border }]}>
@@ -241,13 +251,16 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     borderBottomWidth: 1,
   },
+  menuButton: {
+    padding: 8,
+    marginRight: 8,
+  },
   headerContent: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
   },
   headerInfo: {
-    marginLeft: 12,
     flex: 1,
   },
   headerTitle: {
@@ -267,11 +280,15 @@ const styles = StyleSheet.create({
     padding: 8,
     marginLeft: 8,
   },
+  messagesWrapper: {
+    flex: 1,
+  },
   messagesContainer: {
     flex: 1,
   },
   messagesContent: {
-    paddingVertical: 16,
+    paddingTop: 16,
+    paddingBottom: 20,
   },
   typingContainer: {
     flexDirection: 'row',
@@ -300,11 +317,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'flex-end',
     paddingHorizontal: 12,
-    paddingVertical: 8,
+    paddingTop: 8,
+    paddingBottom: Platform.OS === 'ios' ? 34 : 8,
     borderTopWidth: 1,
+    backgroundColor: 'transparent',
   },
   attachButton: {
-    paddingBottom: 8,
+    paddingBottom: 4,
     paddingRight: 8,
   },
   inputContainer: {
@@ -336,11 +355,11 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.primary[600],
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 6,
+    marginBottom: 2,
   },
   voiceButton: {
     marginLeft: 8,
-    paddingBottom: 8,
+    paddingBottom: 4,
     paddingLeft: 8,
   },
 });
